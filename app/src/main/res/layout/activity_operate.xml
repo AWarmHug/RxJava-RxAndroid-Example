@@ -181,6 +181,33 @@
                 android:onClick="onClick"
                 android:text="zip" />
         </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/first"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="first" />
+
+        <Button
+            android:id="@+id/elementAt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="elementAt" />
+
+        <Button
+            android:id="@+id/ofType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:text="ofType" />
+    </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"

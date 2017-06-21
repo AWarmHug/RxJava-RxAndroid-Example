@@ -645,7 +645,7 @@ public class OperateActivity extends AppCompatActivity {
                 break;
             case R.id.zip:
 
-                Observable.zip(Observable.just(u, u2, u3, u4), Observable.just(p, p2, p3, p4), new BiFunction<LoginInfo, Parent, Family>() {
+                Observable.zip(Observable.just(u, u2, u3), Observable.just(p, p2, p3, p4), new BiFunction<LoginInfo, Parent, Family>() {
                     @Override
                     public Family apply(@NonNull LoginInfo loginInfo, @NonNull Parent parent) throws Exception {
 
@@ -675,6 +675,36 @@ public class OperateActivity extends AppCompatActivity {
                     }
                 });
                 break;
+            case R.id.first:
+                Observable.just(u,u2,u3,u4).first(u).subscribe(new Consumer<LoginInfo>() {
+                    @Override
+                    public void accept(@NonNull LoginInfo loginInfo) throws Exception {
+                        content.append(loginInfo.toString());
+
+                    }
+                });
+
+                break;
+            case R.id.elementAt:
+                Observable.just(u,u2,u3,u4).elementAt(3).subscribe(new Consumer<LoginInfo>() {
+                    @Override
+                    public void accept(@NonNull LoginInfo loginInfo) throws Exception {
+                        content.append(loginInfo.toString());
+
+                    }
+                });
+                break;
+            case R.id.ofType:
+                //检查类型
+                Observable.just(u,1,u3,u4).ofType(LoginInfo.class).subscribe(new Consumer<LoginInfo>() {
+                    @Override
+                    public void accept(@NonNull LoginInfo loginInfo) throws Exception {
+                        content.append(loginInfo.toString());
+
+                    }
+                });
+                break;
+
             case R.id.sample1:
                 //获取登录了的User的父母信息。
                 Observable.just(u, u2, u3, u4).filter(new Predicate<LoginInfo>() {
@@ -724,6 +754,7 @@ public class OperateActivity extends AppCompatActivity {
                     }
                 });
                 break;
+
 
         }
     }
