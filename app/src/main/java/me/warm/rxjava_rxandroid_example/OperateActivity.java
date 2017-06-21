@@ -4,9 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -37,10 +40,11 @@ import me.warm.rxjava_rxandroid_example.entity.User;
  * Created by warm on 17/6/20.
  */
 
-public class OperateActivity extends AppCompatActivity {
+public class OperateActivity extends AppCompatActivity implements TextWatcher {
     private static final String TAG = "OperateActivity";
 
     private TextView content;
+    private EditText et_sample;
 
 
     LoginInfo u = new LoginInfo(true, new User(10002, 12, "王二"));
@@ -72,6 +76,8 @@ public class OperateActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_operate);
         content = (TextView) this.findViewById(R.id.content);
+        et_sample = (EditText) this.findViewById(R.id.et_sample);
+        et_sample.addTextChangedListener(this);
         Toolbar tb = (Toolbar) this.findViewById(R.id.tb);
         tb.inflateMenu(R.menu.main);
         tb.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -645,11 +651,36 @@ public class OperateActivity extends AppCompatActivity {
                 break;
             case R.id.zip:
 
-                Observable.zip(Observable.just(u, u2, u3), Observable.just(p, p2, p3, p4), new BiFunction<LoginInfo, Parent, Family>() {
+                Observable<User> user = Observable.just(u, u2, u3, u4).filter(new Predicate<LoginInfo>() {
                     @Override
-                    public Family apply(@NonNull LoginInfo loginInfo, @NonNull Parent parent) throws Exception {
+                    public boolean test(@NonNull LoginInfo loginInfo) throws Exception {
+                        //检查有没有登录
+                        return loginInfo.isLogin();
+                    }
+                }).map(new Function<LoginInfo, User>() {
+                    @Override
+                    public User apply(@NonNull LoginInfo loginInfo) throws Exception {
+                        //登录的User信息
+                        return loginInfo.getUser();
+                    }
+                });
 
-                        return new Family(loginInfo.getUser(),parent);
+                Observable<Parent> parent = user.flatMap(new Function<User, ObservableSource<Parent>>() {
+                    @Override
+                    public ObservableSource<Parent> apply(@NonNull final User user) throws Exception {
+                        return Observable.just(p, p2, p3, p4).filter(new Predicate<Parent>() {
+                            @Override
+                            public boolean test(@NonNull Parent parent) throws Exception {
+                                //判断user的id和父母的id是否相同
+                                return parent.getId() == user.getId();
+                            }
+                        });
+                    }
+                });
+                Observable.zip(user, parent, new BiFunction<User, Parent, Family>() {
+                    @Override
+                    public Family apply(@NonNull User user, @NonNull Parent parent) throws Exception {
+                        return new Family(user, parent);
                     }
                 }).subscribe(new Observer<Family>() {
                     @Override
@@ -676,7 +707,7 @@ public class OperateActivity extends AppCompatActivity {
                 });
                 break;
             case R.id.first:
-                Observable.just(u,u2,u3,u4).first(u).subscribe(new Consumer<LoginInfo>() {
+                Observable.just(u, u2, u3, u4).first(u).subscribe(new Consumer<LoginInfo>() {
                     @Override
                     public void accept(@NonNull LoginInfo loginInfo) throws Exception {
                         content.append(loginInfo.toString());
@@ -686,7 +717,7 @@ public class OperateActivity extends AppCompatActivity {
 
                 break;
             case R.id.elementAt:
-                Observable.just(u,u2,u3,u4).elementAt(3).subscribe(new Consumer<LoginInfo>() {
+                Observable.just(u, u2, u3, u4).elementAt(3).subscribe(new Consumer<LoginInfo>() {
                     @Override
                     public void accept(@NonNull LoginInfo loginInfo) throws Exception {
                         content.append(loginInfo.toString());
@@ -696,13 +727,52 @@ public class OperateActivity extends AppCompatActivity {
                 break;
             case R.id.ofType:
                 //检查类型
-                Observable.just(u,1,u3,u4).ofType(LoginInfo.class).subscribe(new Consumer<LoginInfo>() {
+                Observable.just(u, 1, u3, u4).ofType(LoginInfo.class).subscribe(new Consumer<LoginInfo>() {
                     @Override
                     public void accept(@NonNull LoginInfo loginInfo) throws Exception {
                         content.append(loginInfo.toString());
 
                     }
                 });
+                break;
+            case R.id.exists:
+
+
+                break;
+
+            case R.id.debounce:
+
+                Observable.create(new ObservableOnSubscribe<LoginInfo>() {
+                    @Override
+                    public void subscribe(@NonNull ObservableEmitter<LoginInfo> e) throws Exception {
+                        e.onNext(u);
+                        e.onNext(u2);
+                    }
+                }).debounce(2, TimeUnit.SECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<LoginInfo>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull LoginInfo loginInfo) {
+                                content.append(loginInfo.toString());
+
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
                 break;
 
             case R.id.sample1:
@@ -759,11 +829,71 @@ public class OperateActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    private int time;
+
+    @Override
+    public void onTextChanged(final CharSequence s, int start, int before, int count) {
+        Observable.create(new ObservableOnSubscribe<CharSequence>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<CharSequence> e) throws Exception {
+                e.onNext(s);
+            }
+        }).debounce(2, TimeUnit.SECONDS)
+                .switchMap(new Function<CharSequence, ObservableSource<String>>() {
+                    @Override
+                    public ObservableSource<String> apply(@NonNull final CharSequence charSequence) throws Exception {
+                        return Observable.create(new ObservableOnSubscribe<String>() {
+                            @Override
+                            public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
+                                e.onNext(charSequence.toString());
+                            }
+                        });
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull String ss) {
+                        Log.d(TAG, "onTextChanged: " + ss);
+                        content.append(ss);
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
+    }
+
+
     private LoginInfo goLogin(LoginInfo login) {
         login.setLogin(true);
         return login;
     }
-
 
     private Observable<LoginInfo> getObservable() {
         return Observable.create(new ObservableOnSubscribe<LoginInfo>() {
