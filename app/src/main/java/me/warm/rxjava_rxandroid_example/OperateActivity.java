@@ -26,10 +26,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
+import io.reactivex.observables.GroupedObservable;
 import io.reactivex.schedulers.Schedulers;
 import me.warm.rxjava_rxandroid_example.entity.Family;
 import me.warm.rxjava_rxandroid_example.entity.LoginInfo;
@@ -38,10 +40,11 @@ import me.warm.rxjava_rxandroid_example.entity.User;
 
 /**
  * Created by warm on 17/6/20.
+ * 部分参考自：https://github.com/mcxiaoke/RxDocs
  */
 
 public class OperateActivity extends AppCompatActivity implements TextWatcher {
-    private static final String TAG = "OperateActivity";
+    private static final String TAG = "OperateActivity1";
 
     private TextView content;
     private EditText et_sample;
@@ -297,6 +300,7 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
 
 
             case R.id.timer:
+                //过一段时间后，发送一个简单的0
                 Observable.timer(2, TimeUnit.SECONDS)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -309,7 +313,6 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                             @Override
                             public void onNext(@NonNull Long aLong) {
                                 content.append("aLong=" + aLong);
-
 
                             }
 
@@ -427,6 +430,34 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                 break;
 
 
+            case R.id.start:
+                //在Observable前添加新的
+                Observable.just(u, u2, u3, u4).startWith(u5)
+                        .subscribe(new Observer<LoginInfo>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull LoginInfo loginInfo) {
+                                content.append(loginInfo.toString());
+
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+                break;
+
+
             /*******************************************************************************************************************************/
 
 
@@ -534,6 +565,43 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                     }
                 });
                 break;
+            case R.id.scan:
+                //数学比较差，看不懂这个有什么用，使用后面一个装备前面一个？
+
+                Observable.just(1, 2, 3, 4, 5, 6).scan(new BiFunction<Integer, Integer, Integer>() {
+                    @Override
+                    public Integer apply(@NonNull Integer integer, @NonNull Integer integer2) throws Exception {
+                        Log.d(TAG, "apply: integer=" + integer + "integer2=" + integer2);
+                        return integer + integer;
+                    }
+                }).subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Integer integer) {
+                        Log.d(TAG, "onNext=" + integer);
+                        content.append("integer=" + integer + "\n");
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                        content.append("onComplete");
+
+                    }
+                });
+                break;
+
+
             case R.id.take:
                 //只取前几个
                 getObservable().take(3).subscribe(new Observer<LoginInfo>() {
@@ -616,6 +684,67 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                             }
                         });
 
+
+                break;
+
+            case R.id.groupBy:
+
+//               第一个 new Function<LoginInfo(前面的类型), Boolean（key类型）>()
+
+
+                Observable.just(u, u2, u3, u4, u7).groupBy(/* new Function<LoginInfo(前面的类型), Boolean（key类型）>*/new Function<LoginInfo, Boolean>() {
+                    @Override
+                    public Boolean apply(@NonNull LoginInfo loginInfo) throws Exception {
+                        return loginInfo.isLogin();
+                    }
+                }, /* new Function<LoginInfo(前面的类型), Boolean（value类型）>*/new Function<LoginInfo, User>() {
+                    @Override
+                    public User apply(@NonNull LoginInfo loginInfo) throws Exception {
+                        return loginInfo.getUser();
+                    }
+                }).subscribe(new Observer<GroupedObservable<Boolean, User>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull final GroupedObservable<Boolean, User> booleanUserGroupedObservable) {
+                        booleanUserGroupedObservable.subscribe(new Observer<User>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull User user) {
+                                content.append("key=" + booleanUserGroupedObservable.getKey() + "value=" + user.toString());
+
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
 
                 break;
 
@@ -735,8 +864,16 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                     }
                 });
                 break;
-            case R.id.exists:
+            case R.id.contains:
+                //判断是否包含
+                Observable.just(u, u2, u3, u4).contains(u5)
+                        .subscribe(new Consumer<Boolean>() {
+                            @Override
+                            public void accept(@NonNull Boolean aBoolean) throws Exception {
+                                content.append("是否包含：" + aBoolean);
 
+                            }
+                        });
 
                 break;
 
@@ -751,6 +888,33 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                 }).debounce(2, TimeUnit.SECONDS)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<LoginInfo>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull LoginInfo loginInfo) {
+                                content.append(loginInfo.toString());
+
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+
+                            }
+                        });
+                break;
+            case R.id.distinct:
+                //去除重复
+                //distinctUntilChanged(),去除连续的重复数据
+                Observable.just(u, u2, u, u3, u4).distinct()
                         .subscribe(new Observer<LoginInfo>() {
                             @Override
                             public void onSubscribe(@NonNull Disposable d) {
@@ -823,6 +987,100 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
 
                     }
                 });
+                break;
+            case R.id.onErrorResumeNext:
+                //当发生错误的时候发送一个新的Observable继续操作
+                Observable.just(u, u2, 1, u4).cast(LoginInfo.class)
+                        .onErrorResumeNext(Observable.just(u, u2, u3, u4))
+                        .subscribe(new Observer<LoginInfo>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull LoginInfo loginInfo) {
+                                content.append(loginInfo.toString());
+
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                                content.append("Throwable=" + e.toString());
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+                                content.append("onComplete");
+                            }
+                        });
+                break;
+            case R.id.onErrorReturn:
+                //与onErrorResumeNext类似，但是发生错误的时候，直接添加一个新的T，继续操作，但是不会错误后面的不会继续
+                //我本以为，会使用新的这个来代替错误的，其实是不对的。
+                Observable.just(u, u2, 1, u4)
+                        .cast(LoginInfo.class)
+                        .onErrorReturn(new Function<Throwable, LoginInfo>() {
+                            @Override
+                            public LoginInfo apply(@NonNull Throwable throwable) throws Exception {
+                                return u3;
+                            }
+                        }).subscribe(new Observer<LoginInfo>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull LoginInfo loginInfo) {
+                        content.append(loginInfo.toString());
+
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        content.append("Throwable=" + e.toString());
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        content.append("onComplete");
+
+                    }
+                });
+                break;
+            case R.id.retry:
+                //重试 retry（long time）重试多少次
+                Observable.just(u, u2, 1, u4)
+                        .cast(LoginInfo.class)
+                        .retry(1)
+                        .subscribe(new Observer<LoginInfo>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onNext(@NonNull LoginInfo loginInfo) {
+                                content.append(loginInfo.toString());
+
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                                content.append("Throwable=" + e.toString());
+
+                            }
+
+                            @Override
+                            public void onComplete() {
+                                content.append("onComplete");
+
+                            }
+                        });
                 break;
 
 

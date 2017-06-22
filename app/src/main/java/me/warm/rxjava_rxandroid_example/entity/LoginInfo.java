@@ -35,6 +35,6 @@ public class LoginInfo {
         return "LoginInfo{" +
                 "login=" + login +
                 ", user=" + user +
-                '}';
+                '}'+"\n";
     }
 }
