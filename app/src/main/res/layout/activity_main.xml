@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="me.warm.rxjava_rxandroid_example.MainActivity">
 
     <Button
@@ -11,6 +12,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="操作符"
+        android:onClick="onClick"
+        />
+    <Button
+        android:id="@+id/bt_rxbinding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RxBinding"
         android:onClick="onClick"
         />
 

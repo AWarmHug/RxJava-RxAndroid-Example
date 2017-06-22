@@ -7,6 +7,7 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
            case R.id.tv_operate:
                startActivity(new Intent(this,OperateActivity.class));
 
+               break;
+           case R.id.bt_rxbinding:
+               startActivity(new Intent(this,RxBindingActivity.class));
                break;
        }
 
