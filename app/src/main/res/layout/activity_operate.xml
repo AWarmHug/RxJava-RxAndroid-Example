@@ -15,9 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            app:title="@string/app_name"
-
-
+            app:title="OperateActivity"
             >
 
         </android.support.v7.widget.Toolbar>

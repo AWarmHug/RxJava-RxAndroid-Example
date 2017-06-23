@@ -24,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
            case R.id.bt_rxbinding:
                startActivity(new Intent(this,RxBindingActivity.class));
                break;
+           case R.id.bt_retrofit:
+               startActivity(new Intent(this,RetrofitActivity.class));
+               break;
        }
 
     }

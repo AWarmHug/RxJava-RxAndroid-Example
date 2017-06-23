@@ -1,59 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/sv"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         android:orientation="vertical">
+
         <android.support.v7.widget.Toolbar
             android:id="@+id/tb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            app:title="RxBindingActivity"
-            >
+            app:title="OperateActivity">
 
         </android.support.v7.widget.Toolbar>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
+            android:layout_height="wrap_content">
             <Button
-                android:id="@+id/bt"
+                android:id="@+id/bt_get"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="点击" />
-
-            <EditText
-                android:id="@+id/et"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <android.support.v7.widget.AppCompatSeekBar
-                android:id="@+id/seekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:id="@+id/countDown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="点击获取" />
-
-            <Button
-                android:id="@+id/go_recy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="recycleView" />
+                android:text="get"
+                />
 
         </LinearLayout>
-
 
         <TextView
             android:id="@+id/content"
@@ -61,6 +37,4 @@
             android:layout_height="wrap_content" />
 
     </LinearLayout>
-
-
 </ScrollView>

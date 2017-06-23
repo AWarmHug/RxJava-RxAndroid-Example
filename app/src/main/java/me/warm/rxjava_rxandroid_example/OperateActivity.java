@@ -26,7 +26,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -458,8 +457,6 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                 break;
 
 
-            /*******************************************************************************************************************************/
-
 
             case R.id.map:
                 getObservable().map(new Function<LoginInfo, LoginInfo>() {
@@ -494,7 +491,8 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
                 });
                 break;
             case R.id.flatMap:
-                getObservable().flatMap(new Function<LoginInfo, ObservableSource<User>>() {
+
+                Observable.just(u,u2,u3,u4).flatMap(new Function<LoginInfo, ObservableSource<User>>() {
                     @Override
                     public ObservableSource<User> apply(@NonNull final LoginInfo loginInfo) throws Exception {
                         return Observable.create(new ObservableOnSubscribe<User>() {
@@ -604,7 +602,7 @@ public class OperateActivity extends AppCompatActivity implements TextWatcher {
 
             case R.id.take:
                 //只取前几个
-                getObservable().take(3).subscribe(new Observer<LoginInfo>() {
+                Observable.just(u,u2,u3,u4,u5).take(3).subscribe(new Observer<LoginInfo>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
 
