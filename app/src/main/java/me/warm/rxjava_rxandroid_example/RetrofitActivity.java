@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
@@ -67,7 +66,7 @@ public class RetrofitActivity extends AppCompatActivity {
                 .flatMap(new Function<Object, ObservableSource<BaseEntity<List<Data>>>>() {
                     @Override
                     public ObservableSource<BaseEntity<List<Data>>> apply(@NonNull Object o) throws Exception {
-                        return RetrofitHelper.getApi(Api.class).getDate()
+                        return RetrofitHelper.getApi(Api.class).getDate("Android")
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread());
                     }
@@ -78,23 +77,9 @@ public class RetrofitActivity extends AppCompatActivity {
                         return !listBaseEntity.isError();
                     }
                 })
-                .map(new Function<BaseEntity<List<Data>>, List<Data>>() {
-                    @Override
-                    public List<Data> apply(@NonNull BaseEntity<List<Data>> listBaseEntity) throws Exception {
-                        return listBaseEntity.getResults();
-                    }
-                })
-                .subscribe(new Consumer<List<Data>>() {
-                    @Override
-                    public void accept(@NonNull List<Data> datas) throws Exception {
-                        content.append(datas.toString());
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        Log.d(TAG, "accept: "+throwable);
-                    }
-                });
+                .map(listBaseEntity -> listBaseEntity.getResults())
+                .subscribe(datas -> content.append(datas.toString())
+                        , throwable -> Log.d(TAG, "accept: "+throwable));
     }
 
 
