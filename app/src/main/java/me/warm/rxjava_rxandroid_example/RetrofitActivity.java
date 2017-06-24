@@ -61,6 +61,7 @@ public class RetrofitActivity extends AppCompatActivity {
      * 如果写在RxBinding上，会导致在子线程中操作Ui的错误
      */
     private void doGet() {
+        Function<BaseEntity<List<Data>>, List<Data>> listFunction=BaseEntity::getResults;
 
         RxView.clicks(bt_get).throttleFirst(1, TimeUnit.SECONDS)
                 .flatMap(new Function<Object, ObservableSource<BaseEntity<List<Data>>>>() {
@@ -77,7 +78,8 @@ public class RetrofitActivity extends AppCompatActivity {
                         return !listBaseEntity.isError();
                     }
                 })
-                .map(listBaseEntity -> listBaseEntity.getResults())
+                //还有这种操作？
+                .map(listFunction)
                 .subscribe(datas -> content.append(datas.toString())
                         , throwable -> Log.d(TAG, "accept: "+throwable));
     }
