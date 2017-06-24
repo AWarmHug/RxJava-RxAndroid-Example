@@ -16,12 +16,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import me.warm.rxjava_rxandroid_example.api.Api;
+import me.warm.rxjava_rxandroid_example.entity.BaseEntity;
+import me.warm.rxjava_rxandroid_example.entity.Data;
 import me.warm.rxjava_rxandroid_example.utils.RetrofitHelper;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -124,6 +131,7 @@ public class RetrofitActivity extends AppCompatActivity {
      * 如果写在RxBinding上，会导致在子线程中操作Ui的错误
      */
     private void doGet() {
+        Function<BaseEntity<List<Data>>, List<Data>> listFunction=BaseEntity::getResults;
 
         RxView.clicks(bt_get).throttleFirst(1, TimeUnit.SECONDS)
                 .flatMap(o -> RetrofitHelper.getApi(Api.class).getDate("Android")
@@ -131,6 +139,22 @@ public class RetrofitActivity extends AppCompatActivity {
                         .observeOn(AndroidSchedulers.mainThread()))
                 .filter(listBaseEntity -> !listBaseEntity.isError())
                 .map(listBaseEntity -> listBaseEntity.getResults())
+                .flatMap(new Function<Object, ObservableSource<BaseEntity<List<Data>>>>() {
+                    @Override
+                    public ObservableSource<BaseEntity<List<Data>>> apply(@NonNull Object o) throws Exception {
+                        return RetrofitHelper.getApi(Api.class).getDate("Android")
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread());
+                    }
+                })
+                .filter(new Predicate<BaseEntity<List<Data>>>() {
+                    @Override
+                    public boolean test(@NonNull BaseEntity<List<Data>> listBaseEntity) throws Exception {
+                        return !listBaseEntity.isError();
+                    }
+                })
+                //还有这种操作？
+                .map(listFunction)
                 .subscribe(datas -> content.append(datas.toString())
                         , throwable -> Log.d(TAG, "accept: " + throwable));
     }
